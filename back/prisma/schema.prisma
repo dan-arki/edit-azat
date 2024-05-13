@@ -1,0 +1,144 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int             @id @default(autoincrement())
+  email      String          @unique
+  pseudo     String          @unique
+  password   String
+  created_at DateTime        @default(now())
+  platform   User_Platform[]
+  watching   Watching[]
+  WatchList  WatchList[]
+  rating     Rating[]
+}
+
+model User_Platform {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  platformId Int
+  user       User     @relation(fields: [userId], references: [id])
+  platform   Platform @relation(fields: [platformId], references: [id])
+}
+
+model Platform {
+  id       Int              @id @default(autoincrement())
+  title    String
+  logo_url String
+  link     String
+  user     User_Platform[]
+  media    Media_Platform[]
+}
+
+model Media_Platform {
+  id         Int      @id @default(autoincrement())
+  mediaId    Int
+  platformId Int
+  media      Media    @relation(fields: [mediaId], references: [id])
+  platform   Platform @relation(fields: [platformId], references: [id])
+}
+
+model Watching {
+  id         Int      @id @default(autoincrement())
+  created_at DateTime @default(now())
+  userId     Int
+  mediaId    Int
+  user       User     @relation(fields: [userId], references: [id])
+  media      Media    @relation(fields: [mediaId], references: [id])
+}
+
+model Categorie {
+  id    Int               @id @default(autoincrement())
+  title String
+  color String
+  media Categorie_Movie[]
+}
+
+model Media {
+  id          Int               @id @default(autoincrement())
+  title       String
+  trailer_url String
+  photo_url   String
+  logo_url    String
+  description String
+  duration    Int
+  director    String
+  platforms   Media_Platform[]
+  categories  Categorie_Movie[]
+  actor       Actor_Media[]
+  watchlist   WatchList[]
+  Rating      Rating[]
+  season      Season[]
+  watching    Watching[]
+}
+
+model Actor_Media {
+  id      Int   @id @default(autoincrement())
+  actorId Int
+  mediaId Int
+  actor   Actor @relation(fields: [actorId], references: [id])
+  media   Media @relation(fields: [mediaId], references: [id])
+}
+
+model Actor {
+  id          Int           @id @default(autoincrement())
+  name        String
+  picture_url String?
+  media       Actor_Media[]
+}
+
+model WatchList {
+  id         Int      @id @default(autoincrement())
+  created_at DateTime @default(now())
+  userId     Int
+  mediaId    Int
+  user       User     @relation(fields: [userId], references: [id])
+  media      Media    @relation(fields: [mediaId], references: [id])
+}
+
+model Rating {
+  id        Int      @id @default(autoincrement())
+  score     Int      @default(0)
+  userId    Int
+  mediaId   Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  media     Media    @relation(fields: [mediaId], references: [id])
+}
+
+model Season {
+  id       Int       @id @default(autoincrement())
+  number   Int
+  mediaId  Int
+  media    Media     @relation(fields: [mediaId], references: [id])
+  episodes Episode[]
+}
+
+model Episode {
+  id          Int     @id @default(autoincrement())
+  title       String
+  description String
+  number      Int
+  seasonId    Int
+  Season      Season? @relation(fields: [seasonId], references: [id])
+}
+
+model Categorie_Movie {
+  id          Int       @id @default(autoincrement())
+  categorieId Int
+  mediaId     Int
+  categorie   Categorie @relation(fields: [categorieId], references: [id])
+  media       Media     @relation(fields: [mediaId], references: [id])
+}
